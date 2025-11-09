@@ -2,16 +2,16 @@ import { Server } from "socket.io";
 import Redis from "ioredis";
 
 const pub=new Redis({
-    host:'valkey-116a237c-chatupp.j.aivencloud.com',
-    port:18017,
-    username:'default',
-    password:'AVNS_k2kk3bexJjIEAi9sfAs'
+    host:process.env.REDIS_HOST,
+    port:Number(process.env.REDIS_PORT),
+    username:process.env.REDIS_USERNAME,
+    password:process.env.REDIS_PASSWORD,
 });
 const sub=new Redis({
-    host:'valkey-116a237c-chatupp.j.aivencloud.com',
-    port:18017,
-    username:'default',
-    password:'AVNS_k2kk3bexJjIEAi9sfAs'
+    host:process.env.REDIS_HOST,
+    port:Number(process.env.REDIS_PORT),
+    username:process.env.REDIS_USERNAME,
+    password:process.env.REDIS_PASSWORD,
 });
 class SocketService{
     private _io:Server;
@@ -35,21 +35,21 @@ class SocketService{
         const io=this.io;
         io.on("connect",(socket)=>{
             console.log(`New Socket Connected`,socket.id);
-            socket.on('event:message',({message}:{message:string})=>{
+            socket.on('event:message',async({message}:{message:string})=>{
                 console.log('New message received',message);
                 // publish message to redis in messages channel
-                // await pub.publish('MESSAGES',JSON.stringify({message}))
+                await pub.publish('MESSAGES',JSON.stringify({message}))
                 
             })
         })
 
-        // sub.on('message',(channel,message)=>{
-        //     if(channel==='MESSAGES'){
-        //         console.log("New message form redis",message);
+        sub.on('message',(channel,message)=>{
+            if(channel==='MESSAGES'){
+                console.log("New message from redis",message);
                 
-        //         io.emit("message",message);
-        //     }
-        // })
+                io.emit("message",message);
+            }
+        })
     }
 }
 export default SocketService;
