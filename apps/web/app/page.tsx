@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useSocket } from './context/SocketProvider';
-import styles from './page.module.css'; // Adjust path as needed
+import styles from './page.module.css';
 
 export default function Page() {
-  const {sendMessage}=useSocket();
+  const {sendMessage,messages}=useSocket();
   const [message,setMessage]=useState('');
   return (
     <div className={styles.chatContainer}>
@@ -21,6 +21,11 @@ export default function Page() {
           className={styles.inputField}
         />
         <button onClick={(e)=>sendMessage(message)} className={styles.sendButton}>Send</button>
+      <div >
+        {messages.map((e)=>(
+          <li>{e}</li>
+        ))}
+      </div>
       </div>
     </div>
   );
